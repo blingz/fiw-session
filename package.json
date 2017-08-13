@@ -1,11 +1,11 @@
 {
-  "name": "fib-session",
+  "name": "fiw-session",
   "version": "0.1.0",
   "description": "Simple session middleware for fibjs",
   "main": "lib/index.js",
-  "repository": "git://github.com/fibjs/fib-session.git",
-  "author": "Liu Hu <lion@9465.net>",
-  "homepage": "https://github.com/fibjs/fib-session",
+  "repository": "git://github.com/blingz/fiw-session.git",
+  "author": "Blingz",
+  "homepage": "https://github.com/blingz/fiw-session",
   "license": "MIT",
   "keywords": [
     "session",

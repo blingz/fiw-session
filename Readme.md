@@ -94,3 +94,49 @@ returns a header-based session filter.
 
 ### session.api_token
 returns an api handler that gets a new session ID.
+
+---
+JWT (JSON Web Token) options
+
+| options                   | default            |                                                                                                  |
+|---------------------------|--------------------|--------------------------------------------------------------------------------------------------|
+| session_jwt_enabled       |              false | enabled jwt                                                                                      |
+| session_jwt_id_name       |              "jwt" |                                                                                                  |
+| session_jwt_verify        |              null  | function to verify token data, like: function(r, token) {}                                             |
+
+- session_jwt_verify
+```javascript
+  function (r, token) {
+    if(token && token.payload) {
+        // check payload data
+        // ...
+        console.debug('jwt:', token);
+    } else if (r.address == '/login') {
+        // login
+        r.setJsonWebToken({
+            header: { alg: 'HS256' }, 
+            payload: { id: 12345, name: "Frank" }, 
+            key: '98DE76B1'
+        })
+    } else {
+        // redirect
+        r.response.redirect('/login');
+        r.end();
+    } 
+  }
+```
+
+## Methods
+
+
+
+### r.setJsonWebToken(token)
+send cookie to client with Json Web Token
+```javascript
+//if user login
+r.setJsonWebToken({
+  header: { alg: 'HS256' }, 
+  payload: { id: 12345, name: "Frank" }, 
+  key: '98DE76B1'
+})
+```

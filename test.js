@@ -809,6 +809,83 @@ function session_test(name, opts, _before, _after) {
 
         });
 
+
+        describe('JSON Web Token', function () {
+            let req_token = null;
+            let session_jwt_verify = (r, token) => {
+                if(token && token.payload) {
+                    // check payload data
+                    // ...
+                    //console.error('jwt:', token);
+                    req_token = token;
+                } else if (r.address == '/login') {
+                    // login
+                    r.setJsonWebToken({
+                        header: { alg: 'HS256' }, 
+                        payload: { id: 12345, name: "Frank" }, 
+                        key: '98DE76B1'
+                    })
+                } else {
+                    // redirect
+                    // r.response.redirect('/login');
+                    r.response.write('redirect'); //for test
+                    r.end();
+                }
+            };
+
+            before(() => {
+                session = new Session(conn, {
+                    session_jwt_enabled: true,
+                    session_jwt_verify: session_jwt_verify
+                });
+                session.setup();
+            });
+
+            it('check token', () => {
+                ++url.port;
+                let srv = new http.Server(url.port, [
+                    session.cookie_filter,
+                    {
+                        '^/jwt$': (r) => {
+                            r.response.write('jwt')
+                        },
+                        '^/login$': (r) => {
+                            r.response.write('login')
+                        }
+                    }
+                ]);
+                srv.asyncRun();
+
+                let client = new http.Client();
+
+                //not login
+                res = client.get(url.host + '/jwt');
+                var txt = res.data.toString();
+                assert.equal(txt, 'redirect');
+
+                //login
+                res = client.get(url.host + '/login');
+                var txt = res.data.toString();
+                assert.equal(txt, 'login');
+                var b = true;
+                for(var i=0; res.cookies && i<res.cookies.length; i++) {
+                    if(res.cookies[i] && res.cookies[i].name == 'jwt') {
+                        assert.equal(res.cookies[i].value, 'eyJhbGciOiJIUzI1NiJ9.eyJpZCI6MTIzNDUsIm5hbWUiOiJGcmFuayJ9.adE0u7POp1NG1GHQjZUGb9lfovw9-GdEVusqh2Sc0-M');
+                        b = false;
+                    }
+                }
+                assert.equal(b, false, 'JSON Web Token is not correct');
+
+                //after login
+                res = client.get(url.host + '/jwt');
+                var txt = res.data.toString();
+                assert.equal(txt, 'jwt');
+                assert.equal(req_token.header.alg, "HS256");
+                assert.equal(req_token.payload.id, 12345);
+                assert.equal(req_token.payload.name, "Frank");
+            });
+
+        });
     });
 
 }

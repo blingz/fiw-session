@@ -96,47 +96,41 @@ returns a header-based session filter.
 returns an api handler that gets a new session ID.
 
 ---
-JWT (JSON Web Token) options
 
-| options                   | default            |                                                                                                  |
-|---------------------------|--------------------|--------------------------------------------------------------------------------------------------|
-| session_jwt_enabled       |              false | enabled jwt                                                                                      |
-| session_jwt_id_name       |              "jwt" |                                                                                                  |
-| session_jwt_verify        |              null  | function to verify token data, like: function(r, token) {}                                             |
+JSON Web Token(JWT) options
 
-- session_jwt_verify
+| options                   | default |                                                                                                  |
+|---------------------------|---------|--------------------------------------------------------------------------------------------------|
+| session_jwt_algo          |   null  | see jws.ALGORITHMS in https://github.com/fibjs/fib-jws                                           |
+| session_jwt_key           |   null  | sign key. see https://www.npmjs.com/package/fib-jws#jwssignheader-payload-key                    |
+
+- set session_jwt_algo and session_jwt_key to enable JWT
+
+
 ```javascript
-  function (r, token) {
-    if(token && token.payload) {
-        // check payload data
-        // ...
-        console.debug('jwt:', token);
-    } else if (r.address == '/login') {
-        // login
-        r.setJsonWebToken({
-            header: { alg: 'HS256' }, 
-            payload: { id: 12345, name: "Frank" }, 
-            key: '98DE76B1'
-        })
-    } else {
-        // redirect
-        r.response.redirect('/login');
-        r.end();
-    } 
-  }
+// session_jwt_algo 是算法
+// session_jwt_key 是验证签名用的key. HS256算法的verify_key和sign_key是一样的(对称算法)，但其他算法就不一定。
+var session = new Session(conn, { session_jwt_algo: 'HS256',  session_jwt_key: verify_key })
 ```
 
 ## Methods
 
-
-
-### r.setJsonWebToken(token)
-send cookie to client with Json Web Token
+### r.setSessionToken 
+- 下发令牌(Token)
+- key 用于签名的key
+- JWT的目的是为了分布式，所以同一个session里只能设置一次setSessionToken
+  对应的r.session (默认值r.session={} ) 只能设置一次，多次设置则抛出异常
+  new Error('Can't modify the JSON Web Token')。
 ```javascript
-//if user login
-r.setJsonWebToken({
-  header: { alg: 'HS256' }, 
-  payload: { id: 12345, name: "Frank" }, 
-  key: '98DE76B1'
-})
+// 将{ id: 12345, name: "Frank" }签名之后设置cookie
+r.setSessionToken({ id: 12345, name: "Frank" }, sign_key)
 ```
+
+### r.getSessionToken 
+- API模式获取token
+```javascript
+r.getSessionToken({ id: 12345, name: "Frank" }, sign_key)
+```
+
+
+

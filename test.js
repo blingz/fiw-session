@@ -839,7 +839,7 @@ function session_test(name, opts, _before, _after) {
                             r.response.write('jwt')
                         },
                         '^/login$': (r) => {
-                            r.setSessionToken({ id: 12345, name: "Frank" }, session_jwt_key);
+                            session.setTokenCookie(r, { id: 12345, name: "Frank" }, session_jwt_key);
                             jwt_req_session = r.session;
                             r.response.write('login')
                         },
@@ -899,6 +899,9 @@ function session_test(name, opts, _before, _after) {
                 res = client.get(url.host + '/jwt_delete');
                 var txt = res.data.toString();
                 assert.equal(txt, "Can't modify the JSON Web Token.");
+
+                var jwt_token = session.getToken({abc:'xyz'}, 'test');
+                assert.equal(jwt_token, 'eyJhbGciOiJIUzI1NiJ9.eyJhYmMiOiJ4eXoifQ.ltcUVSz3Np3ZSLpk7TwtTFFjlNY8X2nikCGcuF2ZMgE')
             });
 
         });
@@ -938,7 +941,7 @@ function session_test(name, opts, _before, _after) {
                             r.response.write('session-ok');
                         },
                         '^/user$': (r) => {
-                            r.setSessionToken && r.setSessionToken({id: r.query.id||"1", username: r.query.username}, session_jwt_key);
+                            session.setTokenCookie && session.setTokenCookie(r, {id: r.query.id||"1", username: r.query.username}, session_jwt_key);
                         },
                         '^/get$': (r) => r.response.write(JSON.stringify({
                             username: r.session.username

@@ -115,7 +115,7 @@ var session = new Session(conn, { session_jwt_algo: 'HS256',  session_jwt_key: v
 
 ## Methods
 
-### session.setToken 
+### session.setTokenCookie 
 - 下发令牌(Token)
 - key 用于签名的key
 - JWT的目的是为了分布式，所以同一个session里只能设置一次setSessionToken
@@ -123,7 +123,7 @@ var session = new Session(conn, { session_jwt_algo: 'HS256',  session_jwt_key: v
   new Error('Can't modify the JSON Web Token')。
 ```javascript
 // 将{ id: 12345, name: "Frank" }签名之后设置cookie
-session.setToken({ id: 12345, name: "Frank" }, sign_key)
+session.setTokenCookie({ id: 12345, name: "Frank" }, sign_key)
 ```
 
 ### session.getToken 

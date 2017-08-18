@@ -839,7 +839,7 @@ function session_test(name, opts, _before, _after) {
                             r.response.write('jwt')
                         },
                         '^/login$': (r) => {
-                            session.setToken(r, { id: 12345, name: "Frank" }, session_jwt_key);
+                            session.setTokenCookie(r, { id: 12345, name: "Frank" }, session_jwt_key);
                             jwt_req_session = r.session;
                             r.response.write('login')
                         },
@@ -941,7 +941,7 @@ function session_test(name, opts, _before, _after) {
                             r.response.write('session-ok');
                         },
                         '^/user$': (r) => {
-                            session.setToken && session.setToken(r, {id: r.query.id||"1", username: r.query.username}, session_jwt_key);
+                            session.setTokenCookie && session.setTokenCookie(r, {id: r.query.id||"1", username: r.query.username}, session_jwt_key);
                         },
                         '^/get$': (r) => r.response.write(JSON.stringify({
                             username: r.session.username
